@@ -1,0 +1,7 @@
+__pycache__
+node_modules
+npm-debug.log
+dist
+package-lock.json
+credentials.json
+.env
