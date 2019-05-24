@@ -1,7 +1,8 @@
-from app import app
+from app import app, db
 import requests
 import os
 import json
+from . import models
 from flask import jsonify
 from flask import render_template
 from flask_cors import CORS
@@ -28,19 +29,24 @@ def google_login():
 
 @app.route('/index')
 def index():
-    try:
+    #try:
         credentials = flow.step2_exchange(request.args.get('code'))
         userData = requests.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + credentials.access_token).content
         userData = json.loads(userData.decode('utf-8'))
         user = {
             'name': userData['name'],
             'email': userData['email'],
-            'googleId': userData['id'],
-            'googleAccessToken': credentials.access_token
+            'googleId': userData['id']
         }
+        if models.User.Select.where(email = userData['email']):
+            print('USERINHERE')
+        else:
+            insertUser = models.User(**user)
+            db.session.add(insertUser)
+            db.session.commit()
         return render_template('index.html', title="Calendar")
-    except:
-        return render_template('login.html')
+    # except:
+    #     return render_template('login.html')
 
 @app.route('/calendar')
 def calendar():

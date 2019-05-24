@@ -5,11 +5,12 @@ class User(db.Model):
     name = db.Column(db.String(64))
     email = db.Column(db.String(120), index=True, unique=True)
     googleId = db.Column(db.String(128))
-    googleAccessToken = db.Column(db.String(128))
     role = db.Column(db.Integer, default=10)
 
-    def __repr__(self):
-        return '<User {}>'.format(self.name)
+    def __init__(self, name, email, googleId):
+        self.name = name
+        self.email = email
+        self.googleId = googleId
 
 class Vacation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -17,3 +18,10 @@ class Vacation(db.Model):
     fromDate = db.Column(db.Date)
     toDate = db.Column(db.Date)
     status = db.Column(db.Integer, default=0)
+
+    def __init__(self, id, userId, fromDate, toDate, status):
+        self.id = id
+        self.userId = userId
+        self.fromDate = fromDate
+        self.toDate = toDate
+        self.status = status
