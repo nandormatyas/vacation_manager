@@ -29,7 +29,7 @@ def google_login():
 
 @app.route('/index')
 def index():
-    #try:
+    try:
         credentials = flow.step2_exchange(request.args.get('code'))
         userData = requests.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + credentials.access_token).content
         userData = json.loads(userData.decode('utf-8'))
@@ -38,19 +38,36 @@ def index():
             'email': userData['email'],
             'googleId': userData['id']
         }
-        if models.User.Select.where(email = userData['email']):
-            print('USERINHERE')
+        olduser = models.User.query.filter(models.User.email == userData['email']).all()
+        if olduser:
+            return render_template('index.html', title="Calendar")
         else:
             insertUser = models.User(**user)
             db.session.add(insertUser)
             db.session.commit()
-        return render_template('index.html', title="Calendar")
-    # except:
-    #     return render_template('login.html')
+            return render_template('index.html', title="Calendar")
+    except:
+        return render_template('login.html')
 
 @app.route('/calendar')
 def calendar():
-    events = [
+    events = models.Vacation.query.all()
+    print(events[0].__dict__)
+    #print(events[0]['fromDate'])
+
+    eventList = []
+    for event in events:
+        print('YOOOO')
+        print(event.fromDate)
+        eventObject = {
+            'title': 'userId ' + 'Vacation',
+            'start': event.fromDate,
+            'end': event.toDate
+        }
+        print('BOGYO')
+        eventList.append(eventObject)
+    print(eventList)
+    events1 = [
             {
                 'title': 'All Day Event',
                 'start': '2018-01-01',
@@ -107,7 +124,7 @@ def calendar():
             }
             ]
 
-    resp = jsonify(events)
+    resp = jsonify(eventList)
     resp.status_code = 200
     resp.headers.add('Access-Control-Allow-Origin', '*')
 
@@ -115,6 +132,17 @@ def calendar():
 
 @app.route('/vacation_request', methods=['POST'])
 def vacation_request():
+    print(request.form['date-from'])
+
+    date = {
+        'userId': 1,
+        'fromDate': request.form['date-from'],
+        'toDate': request.form['date-to']
+    }
+    insertDate = models.Vacation(**date)
+    db.session.add(insertDate)
+    db.session.commit()
+
     resp = jsonify({'ok': 'ok'})
     resp.status_code = 200
     return resp

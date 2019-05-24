@@ -15,13 +15,11 @@ class User(db.Model):
 class Vacation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.Integer)
-    fromDate = db.Column(db.Date)
-    toDate = db.Column(db.Date)
+    fromDate = db.Column(db.String(64))
+    toDate = db.Column(db.String(64))
     status = db.Column(db.Integer, default=0)
 
-    def __init__(self, id, userId, fromDate, toDate, status):
-        self.id = id
+    def __init__(self, userId, fromDate, toDate):
         self.userId = userId
         self.fromDate = fromDate
         self.toDate = toDate
-        self.status = status
