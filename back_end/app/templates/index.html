@@ -24,12 +24,15 @@
 </style>
 </head>
 <body>
-
+  {% block content %}
+    <h1>Hi, {{ user }}!</h1>
+  {% endblock %}
   <div id='calendar'></div>
   <div>
     <form method="post" action="http://localhost:5000/vacation_request">
       <input type="date" placeholder="from" name="date-from">
       <input type="date" placeholder="to" name="date-to">
+      <input type="hidden" value={{user|tojson}} name="name">
       <input type="submit" value="submit">
     </form>
   </div>

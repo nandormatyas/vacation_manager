@@ -4,6 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 
+
 function getVacations(url) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -19,9 +20,9 @@ function getVacations(url) {
 const link = 'http://localhost:5000/calendar'
 
 getVacations(link)
-  .then(response => {
-    console.log(JSON.parse(response))
-    //document.addEventListener('DOMContentLoaded', function() {
+.then(response => {
+    // let userName = document.getElementById("mydiv").dataset.user;
+    // console.log(userName)
     let calendarEl = document.getElementById('calendar');
     let calendar = new Calendar(calendarEl, {
       plugins: [ interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin ],
@@ -30,14 +31,14 @@ getVacations(link)
         center: 'title',
         right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
       },
-      defaultDate: '2018-01-12',
+      defaultDate: '2019-05-12',
       navLinks: true, // can click day/week names to navigate views
       editable: true,
       eventLimit: true, // allow "more" link when too many events
       events: JSON.parse(response)
     });
     calendar.render();
-    //});
+
 })
 
 
