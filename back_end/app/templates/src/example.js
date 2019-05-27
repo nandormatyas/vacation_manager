@@ -23,8 +23,6 @@ const link = 'http://localhost:5000/calendar'
 
 getVacations(link)
 .then(response => {
-    // let userName = document.getElementById("mydiv").dataset.user;
-    // console.log(userName)
     let calendarEl = document.getElementById('calendar');
     let calendar = new Calendar(calendarEl, {
       plugins: [ interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin ],

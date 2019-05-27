@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Admin panel</title>
+</head>
+<body>
+  {% block content %}
+    <h1>Admin panel</h1>
+    <p><b>USERS</b></p>
+      {% for user in users %}
+      <div>
+        <p>{{ user.name }}, {{ user.email }}, {{ user.role }}, {{ user.id }}</p>
+        <form method="post" action="http://localhost:5000/promote">
+          <input type="hidden" value={{user.id}} name="user">
+          <input type="submit" value="Promote">
+        </form>
+        <form method="post" action="http://localhost:5000/degrade">
+          <input type="hidden" value={{user.id}} name="user">
+          <input type="submit" value="Degrade">
+        </form>
+      </div>
+      {% endfor %}
+    <p><b>VACATIONS</b></p>
+      {% for leave in vacations %}
+      <div>
+        <p>{{ leave.fromDate }}, {{ leave.toDate }}, {{ leave.status }}, {{ leave.user_id }}, {{ leave.id }}</p>
+        <form method="post" action="http://localhost:5000/approve">
+          <input type="hidden" value={{leave.id}} name="leave">
+          <input type="submit" value="Approve">
+        </form>
+        <form method="post" action="http://localhost:5000/deny">
+          <input type="hidden" value={{leave.id}} name="leave">
+          <input type="submit" value="Deny">
+        </form>
+        <form method="post" action="http://localhost:5000/delete_vacation">
+          <input type="hidden" value={{leave.id}} name="leave">
+          <input type="submit" value="Delete Vacation">
+        </form>
+      </div>
+      {% endfor %}
+
+  {% endblock %}
+</body>
+</html>

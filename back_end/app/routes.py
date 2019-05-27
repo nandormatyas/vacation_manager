@@ -37,6 +37,13 @@ def authorized_response_creator(user_data):
         resp.set_cookie('access_token_cookie', create_access_token(identity=user))
     return resp
 
+def vacation_status_converter():
+    return {
+            0: 'pending',
+            1: 'approved',
+            2: 'denied'
+        }
+
 @jwt.user_claims_loader
 def add_claims_to_access_token(identity):
     return {
@@ -87,11 +94,7 @@ def calendar():
     events = models.Vacation.query.all()
     eventList = []
     for event in events:
-        vacation_approval_status = {
-            0: 'pending',
-            1: 'approved',
-            2: 'denied'
-        }
+        vacation_approval_status = vacation_status_converter()
         eventObject = {
             'title': str(event.user_id) + ' Vacation ' + vacation_approval_status[event.status],
             'start': event.fromDate,
@@ -123,3 +126,56 @@ def logout():
     resp = make_response(redirect('/login'))
     resp.set_cookie('access_token_cookie', '', expires=0)
     return resp
+
+@app.route('/admin')
+@jwt_required
+def admin():
+    users = models.User.query.all()
+    vacations = models.Vacation.query.all()
+    claims = get_jwt_claims()
+    if claims['user']['user_role'] < 29:
+        return redirect('/logout')
+    else:
+        print(vacations)
+        return render_template('admin.html', title="Admin panel", users=users, vacations=vacations)
+
+@app.route('/promote', methods=['POST'])
+@jwt_required
+def promote():
+    user = models.User.query.filter(models.User.id == request.form['user']).first()
+    user.role += 10
+    db.session.commit()
+    return redirect('/admin')
+
+@app.route('/degrade', methods=['POST'])
+@jwt_required
+def degrade():
+    user = models.User.query.filter(models.User.id == request.form['user']).first()
+    user.role -= 10
+    db.session.commit()
+    return redirect('/admin')
+
+
+@app.route('/approve', methods=['POST'])
+@jwt_required
+def approve():
+    vacation = models.Vacation.query.filter(models.Vacation.id == request.form['leave']).first()
+    vacation.status = 1
+    db.session.commit()
+    return redirect('/admin')
+
+
+@app.route('/deny', methods=['POST'])
+@jwt_required
+def deny():
+    vacation = models.Vacation.query.filter(models.Vacation.id == request.form['leave']).first()
+    vacation.status = 2
+    db.session.commit()
+    return redirect('/admin')
+
+@app.route('/delete_vacation', methods=['POST'])
+@jwt_required
+def delete_vacation():
+    models.Vacation.query.filter(models.Vacation.id == request.form['leave']).delete()
+    db.session.commit()
+    return redirect('/admin')

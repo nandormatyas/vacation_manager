@@ -42,7 +42,13 @@
     {% else %}
     <div></div>
     {% endif %}
-
+    {% if user.user_role > 29%}
+    <div>
+        <form action="http://localhost:5000/admin">
+          <input type="submit" value="Admin Panel">
+        </form>
+    </div>
+    {% endif %}
   {% endblock %}
   <div id='calendar'></div>
 
