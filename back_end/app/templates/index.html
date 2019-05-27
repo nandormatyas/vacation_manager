@@ -24,6 +24,9 @@
 </style>
 </head>
 <body>
+  <form action="http://localhost:5000/logout">
+    <input type="submit" value="logout">
+  </form>
   {% block content %}
     <h1>Hi, {{ user.user_name }}!</h1>
     {% if user.user_role > 19 %}

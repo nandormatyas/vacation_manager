@@ -3,7 +3,7 @@ import requests
 import os
 import json
 from . import models
-from flask import jsonify, render_template, request, redirect, make_response
+from flask import jsonify, render_template, request, redirect, make_response, url_for
 from flask_cors import CORS
 from google_config import flow_config
 from flask_jwt_extended import (
@@ -16,6 +16,33 @@ CORS(app)
 
 flow= flow_config()
 
+def user_object_creator(existing_user):
+    return {
+            'user_id': existing_user.id,
+            'user_role': existing_user.role,
+            'user_email': existing_user.email,
+            'user_name': existing_user.name
+            }
+
+def google_user_processor(code):
+    credentials = flow.step2_exchange(code)
+    userData = requests.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + credentials.access_token).content
+    userData = json.loads(userData.decode('utf-8'))
+    return userData
+
+def authorized_response_creator(user_data):
+    user = user_object_creator(user_data)
+    resp = make_response(redirect('/index'))
+    if not 'access_token_cookie' in request.cookies:
+        resp.set_cookie('access_token_cookie', create_access_token(identity=user))
+    return resp
+
+@jwt.user_claims_loader
+def add_claims_to_access_token(identity):
+    return {
+        'user': identity
+    }
+
 @app.route('/')
 @app.route('/login')
 def login():
@@ -27,38 +54,13 @@ def google_login():
     return redirect(auth_uri)
 
 
-# @app.route('/google_auth')
-# def google_auth():
-
-    # return render_template('index.html', title="Calendar")
-
-    # resp = make_response(redirect('/index'))
-    # resp.set_cookie('username', username)
-    # return resp
-
-
-@jwt.user_claims_loader
-def add_claims_to_access_token(identity):
-    return {
-        'user': identity
-    }
-@app.route('/index')
-def index():
-    # try:
-        credentials = flow.step2_exchange(request.args.get('code'))
-        userData = requests.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + credentials.access_token).content
-        userData = json.loads(userData.decode('utf-8'))
+@app.route('/google_auth')
+def google_auth():
+    try:
+        userData = google_user_processor(request.args.get('code'))
         existing_user = models.User.query.filter(models.User.email == userData['email']).first()
         if existing_user:
-            user = {
-                'user_id': existing_user.id,
-                'user_role': existing_user.role,
-                'user_email': existing_user.email,
-                'user_name': existing_user.name
-            }
-            resp = make_response(render_template('index.html', title="Calendar", user=user))
-            resp.set_cookie(create_access_token(identity=user))
-            return resp
+            return authorized_response_creator(existing_user)
         else:
             user = {
                 'name': userData['name'],
@@ -68,19 +70,20 @@ def index():
             insertUser = models.User(**user)
             db.session.add(insertUser)
             db.session.commit()
-            return redirect('/index')
-    # except:
-    #     return render_template('login.html')
+            new_user = models.User.query.filter(models.User.email == userData['email']).first()
+            return authorized_response_creator(new_user)
+    except:
+        return render_template('login.html')
 
+@app.route('/index')
+@jwt_required
+def index():
+    claims = get_jwt_claims()
+    return render_template('index.html', title="Calendar", user=claims['user'])
 
 @app.route('/calendar')
 @jwt_required
 def calendar():
-
-    print(request.headers.get('Authorization'))
-    claims = get_jwt_claims()
-    print(claims)
-
     events = models.Vacation.query.all()
     eventList = []
     for event in events:
@@ -102,6 +105,7 @@ def calendar():
     return resp
 
 @app.route('/vacation_request', methods=['POST'])
+@jwt_required
 def vacation_request():
     insertDate = models.Vacation(
         fromDate=request.form['date-from'],
@@ -111,6 +115,11 @@ def vacation_request():
     db.session.add(insertDate)
     db.session.commit()
 
-    resp = jsonify({'ok': 'ok'})
+    return redirect('/index')
+
+@app.route('/logout')
+@jwt_required
+def logout():
+    resp = make_response(redirect('/login'))
+    resp.set_cookie('access_token_cookie', '', expires=0)
     return resp
-    # return redirect('/index')

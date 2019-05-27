@@ -10,4 +10,4 @@ def flow_config():
                         scope=['https://www.googleapis.com/auth/gmail.readonly',
                                 'https://www.googleapis.com/auth/userinfo.profile',
                                 'https://www.googleapis.com/auth/userinfo.email' ],
-                        redirect_uri='http://localhost:5000/index')
+                        redirect_uri='http://localhost:5000/google_auth')
