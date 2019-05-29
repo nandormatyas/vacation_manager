@@ -24,18 +24,33 @@
 </style>
 </head>
 <body>
+  <form action="http://localhost:5000/logout">
+    <input type="submit" value="logout">
+  </form>
   {% block content %}
-    <h1>Hi, {{ user }}!</h1>
+    <h1>Hi, {{ user.user_name }}!</h1>
+    {% if user.user_role > 19 %}
+    <div>
+      <form method="post" action="http://localhost:5000/vacation_request">
+        <label for="">When would you like to take your vacation?</label>
+        <input type="date" placeholder="from" name="date-from">
+        <input type="date" placeholder="to" name="date-to">
+        <input type="hidden" value={{user.user_id}} name="user">
+        <input type="submit" value="submit">
+      </form>
+    </div>
+    {% else %}
+    <div></div>
+    {% endif %}
+    {% if user.user_role > 29%}
+    <div>
+        <form action="http://localhost:5000/admin">
+          <input type="submit" value="Admin Panel">
+        </form>
+    </div>
+    {% endif %}
   {% endblock %}
   <div id='calendar'></div>
-  <div>
-    <form method="post" action="http://localhost:5000/vacation_request">
-      <input type="date" placeholder="from" name="date-from">
-      <input type="date" placeholder="to" name="date-to">
-      <input type="hidden" value={{user|tojson}} name="name">
-      <input type="submit" value="submit">
-    </form>
-  </div>
 
 </body>
 </html>

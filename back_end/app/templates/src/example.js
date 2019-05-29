@@ -9,8 +9,10 @@ function getVacations(url) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url);
+    console.log(document.cookie.access_token)
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + document.cookie);
     xhr.onload = () => resolve(xhr.responseText);
     xhr.onerror = () => reject(xhr.statusText);
     xhr.send();
@@ -21,8 +23,6 @@ const link = 'http://localhost:5000/calendar'
 
 getVacations(link)
 .then(response => {
-    // let userName = document.getElementById("mydiv").dataset.user;
-    // console.log(userName)
     let calendarEl = document.getElementById('calendar');
     let calendar = new Calendar(calendarEl, {
       plugins: [ interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin ],
