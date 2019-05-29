@@ -1,0 +1,32 @@
+version: "2"
+services:
+  app:
+    build: ./
+    links:
+      - db
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+  db:
+    image: mysql:5.7
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/:ro
+  migration:
+    build: .
+    image: app
+    environment:
+      DATABASE_URL: mysql://root:root@localhost/vacationManager
+    command: ["./wait-for-it/wait-for-it.sh", "mysql:32000", "--", "flask", "db", "migrate"]
+    #command: flask db migrate
+    volumes:
+      - .:/code
+    links:
+      - db
+    depends_on:
+      - db
+      - app
