@@ -12,6 +12,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
 
+
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
 engine.connect()
 
