@@ -15,14 +15,19 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
     volumes:
-      - ./db:/docker-entrypoint-initdb.d/:ro
+      - ./db/init.sql:/db/init.sql
+      # - ./db:/docker-entrypoint-initdb.d/:ro
   migration:
     build: .
     image: app
     environment:
-      DATABASE_URL: mysql://root:root@localhost/vacationManager
-    command: ["./wait-for-it/wait-for-it.sh", "mysql:32000", "--", "flask", "db", "migrate"]
-    #command: flask db migrate
+      DATABASE_URL: mysql://root:root@db/vacationManager
+      MYSQL_DATABASE: vacationManager
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    # command: ["./wait-for-it/wait-for-it.sh", "db:32000", "--", "bash", "-c", "flask", "db", "upgrade", "&&", "flask", "db", "migrate"]
+    # command: flask db migrate
+    command: bash -c "flask db upgrade && flask db migrate"
     volumes:
       - .:/code
     links:

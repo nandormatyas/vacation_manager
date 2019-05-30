@@ -1,2 +1,2 @@
 CREATE DATABASE vacationManager;
-use vacationManager;
+-- USE vacationManager;
