@@ -14468,7 +14468,7 @@ function getVacations(url) {
   });
 }
 
-const link = 'http://localhost:5000/calendar'
+const link = 'http://ec2-18-196-12-228.eu-central-1.compute.amazonaws.com:5000/calendar'
 
 getVacations(link)
 .then(response => {
