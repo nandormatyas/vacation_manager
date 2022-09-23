@@ -40,7 +40,7 @@ olefile==0.45.1
 pexpect==4.2.1
 Pillow==5.1.0
 pluggy==0.8.1
-protobuf==3.0.0
+protobuf==3.18.3
 py==1.7.0
 pyasn1==0.4.5
 pyasn1-modules==0.2.5
